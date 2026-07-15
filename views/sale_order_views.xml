@@ -22,8 +22,8 @@
                         invisible="state not in ['draft', 'sent']"/>
             </xpath>
             
-            <!-- Agregar total en Bs después del total -->
-            <xpath expr="//field[@name='amount_total']" position="after">
+            <!-- Agregar total en Bs en el grupo de totales -->
+            <xpath expr="//group[@name='sale_total']" position="inside">
                 <field name="l10n_ve_amount_total_bs" 
                        widget="monetary" 
                        options="{'currency_field': 'l10n_ve_currency_id'}"
