@@ -28,11 +28,11 @@ class SaleOrder(models.Model):
         readonly=True,
     )
 
-    @api.onchange('date_order')
+    @api.onchange('date_order', 'partner_id')
     def _onchange_date_order(self):
-        """Actualizar tasa cuando cambia la fecha"""
-        if self.date_order:
-            rate = self.env['res.currency'].l10n_ve_get_current_rate()
+        """Actualizar tasa cuando cambia la fecha o partner"""
+        if not self.l10n_ve_exchange_rate:
+            rate = self.env['res.currency'].sudo().l10n_ve_get_current_rate()
             if rate:
                 self.l10n_ve_exchange_rate = rate
                 self.l10n_ve_exchange_rate_date = fields.Date.today()
@@ -40,17 +40,30 @@ class SaleOrder(models.Model):
     @api.depends('amount_total', 'l10n_ve_exchange_rate')
     def _compute_amounts_bs(self):
         for order in self:
-            # Si no tiene tasa asignada, buscar la actual
-            if not order.l10n_ve_exchange_rate:
-                rate = self.env['res.currency'].sudo().l10n_ve_get_current_rate()
-                if rate:
-                    order.l10n_ve_exchange_rate = rate
-                    order.l10n_ve_exchange_rate_date = fields.Date.today()
-            
             if order.l10n_ve_exchange_rate:
                 order.l10n_ve_amount_total_bs = order.amount_total * order.l10n_ve_exchange_rate
             else:
                 order.l10n_ve_amount_total_bs = 0.0
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        """Asignar tasa automáticamente al crear cotización"""
+        for vals in vals_list:
+            if not vals.get('l10n_ve_exchange_rate'):
+                rate = self.env['res.currency'].sudo().l10n_ve_get_current_rate()
+                if rate:
+                    vals['l10n_ve_exchange_rate'] = rate
+                    vals['l10n_ve_exchange_rate_date'] = fields.Date.today()
+        return super(SaleOrder, self).create(vals_list)
+
+    def write(self, vals):
+        """Asignar tasa automáticamente si no está establecida"""
+        if not self.l10n_ve_exchange_rate and not vals.get('l10n_ve_exchange_rate'):
+            rate = self.env['res.currency'].sudo().l10n_ve_get_current_rate()
+            if rate:
+                vals['l10n_ve_exchange_rate'] = rate
+                vals['l10n_ve_exchange_rate_date'] = fields.Date.today()
+        return super(SaleOrder, self).write(vals)
 
     def action_update_exchange_rate(self):
         """Botón para actualizar tasa manualmente"""
