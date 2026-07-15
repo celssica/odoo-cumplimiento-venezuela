@@ -8,6 +8,6 @@ class ResConfigSettings(models.TransientModel):
         string='Unidad Tributaria (UT)',
         related='company_id.l10n_ve_ut_amount',
         readonly=False,
-        currency_field='company_currency_id',
+        currency_field='currency_id',
         help='Valor de la Unidad Tributaria en VES'
     )
