@@ -48,7 +48,8 @@ class SaleOrder(models.Model):
     def action_update_exchange_rate(self):
         """Botón para actualizar tasa manualmente"""
         self.ensure_one()
-        rate = self.env['res.currency'].l10n_ve_update_rate_yadio()
+        # Llamar al método en el modelo res.currency con sudo para evitar permisos
+        rate = self.env['res.currency'].sudo().l10n_ve_update_rate_yadio()
         if rate:
             self.write({
                 'l10n_ve_exchange_rate': rate,
