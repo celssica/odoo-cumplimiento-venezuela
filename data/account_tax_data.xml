@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- IVA 16% Ventas -->
+    <record id="tax_iva_16_ventas" model="account.tax">
+        <field name="name">IVA 16% Ventas</field>
+        <field name="amount">16</field>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">sale</field>
+        <field name="description">IVA 16%</field>
+    </record>
+
+    <!-- IVA 16% Compras -->
+    <record id="tax_iva_16_compras" model="account.tax">
+        <field name="name">IVA 16% Compras</field>
+        <field name="amount">16</field>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="description">IVA 16%</field>
+    </record>
+
+    <!-- Retención IVA 75% -->
+    <record id="tax_ret_iva_75" model="account.tax">
+        <field name="name">Retención IVA 75%</field>
+        <field name="amount">-75</field>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="description">Ret. IVA 75%</field>
+    </record>
+
+    <!-- Retención IVA 100% -->
+    <record id="tax_ret_iva_100" model="account.tax">
+        <field name="name">Retención IVA 100%</field>
+        <field name="amount">-100</field>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="description">Ret. IVA 100%</field>
+    </record>
+</odoo>
