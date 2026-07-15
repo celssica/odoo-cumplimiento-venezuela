@@ -40,6 +40,13 @@ class SaleOrder(models.Model):
     @api.depends('amount_total', 'l10n_ve_exchange_rate')
     def _compute_amounts_bs(self):
         for order in self:
+            # Si no tiene tasa asignada, buscar la actual
+            if not order.l10n_ve_exchange_rate:
+                rate = self.env['res.currency'].sudo().l10n_ve_get_current_rate()
+                if rate:
+                    order.l10n_ve_exchange_rate = rate
+                    order.l10n_ve_exchange_rate_date = fields.Date.today()
+            
             if order.l10n_ve_exchange_rate:
                 order.l10n_ve_amount_total_bs = order.amount_total * order.l10n_ve_exchange_rate
             else:
@@ -51,10 +58,8 @@ class SaleOrder(models.Model):
         # Llamar al método en el modelo res.currency con sudo para evitar permisos
         rate = self.env['res.currency'].sudo().l10n_ve_update_rate_yadio()
         if rate:
-            self.write({
-                'l10n_ve_exchange_rate': rate,
-                'l10n_ve_exchange_rate_date': fields.Date.today(),
-            })
+            # Forzar recálculo de campos computados
+            self._compute_amounts_bs()
             return {
                 'type': 'ir.actions.client',
                 'tag': 'display_notification',
