@@ -21,26 +21,31 @@ class ResCurrency(models.Model):
 
     def l10n_ve_update_rate_yadio(self):
         """Actualizar tasa USD/VES usando Yadio.io API"""
+        _logger.info("Iniciando actualización de tasa Yadio...")
         try:
             response = requests.get(
                 'https://api.yadio.io/rate/USD/VES',
                 timeout=10
             )
+            _logger.info(f"Respuesta Yadio status: {response.status_code}")
             response.raise_for_status()
             data = response.json()
+            _logger.info(f"Datos Yadio: {data}")
             
             if data.get('rate'):
                 rate = 1.0 / data['rate']  # Invertir porque Odoo guarda rate = 1/tasa
+                _logger.info(f"Rate calculado: {rate}")
                 
                 # Buscar o crear registro de tasa para hoy
                 currency_usd = self.env.ref('base.USD')
-                currency_ves = self.env.ref('base.VES')
+                currency_ves = self.env.ref('base.VES', raise_if_not_found=False)
                 
                 if not currency_ves:
                     _logger.error("No se encontró la moneda VES")
                     return False
                 
                 today = fields.Date.today()
+                _logger.info(f"Buscando tasa para fecha: {today}, moneda: {currency_ves.id}")
                 
                 # Buscar si ya existe tasa para hoy
                 existing_rate = self.env['res.currency.rate'].search([
@@ -50,11 +55,13 @@ class ResCurrency(models.Model):
                 ], limit=1)
                 
                 if existing_rate:
+                    _logger.info(f"Actualizando tasa existente: {existing_rate.id}")
                     existing_rate.write({
                         'rate': rate,
                         'l10n_ve_source': 'yadio',
                     })
                 else:
+                    _logger.info("Creando nueva tasa")
                     self.env['res.currency.rate'].create({
                         'currency_id': currency_ves.id,
                         'name': today,
@@ -65,9 +72,12 @@ class ResCurrency(models.Model):
                 
                 _logger.info(f"Tasa VES actualizada: {data['rate']} Bs/USD")
                 return data['rate']
+            else:
+                _logger.error(f"No se encontró 'rate' en respuesta: {data}")
+                return False
             
         except Exception as e:
-            _logger.error(f"Error actualizando tasa Yadio: {str(e)}")
+            _logger.error(f"Error actualizando tasa Yadio: {str(e)}", exc_info=True)
             return False
 
     def l10n_ve_get_current_rate(self):
