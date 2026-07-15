@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- Vista formulario de cotización con campos Venezuela -->
+    <record id="view_order_form_inherit_ve" model="ir.ui.view">
+        <field name="name">sale.order.form.inherit.ve</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+            <!-- Agregar tasa después del campo partner_id -->
+            <xpath expr="//field[@name='partner_id']" position="after">
+                <field name="l10n_ve_exchange_rate"/>
+                <field name="l10n_ve_exchange_rate_date"/>
+                <field name="l10n_ve_currency_id" invisible="1"/>
+            </xpath>
+            
+            <!-- Agregar botón para actualizar tasa -->
+            <xpath expr="//header" position="inside">
+                <button name="action_update_exchange_rate" 
+                        string="🔄 Actualizar Tasa BCV" 
+                        type="object"
+                        class="btn-secondary"
+                        invisible="state not in ['draft', 'sent']"/>
+            </xpath>
+            
+            <!-- Agregar total en Bs después del total -->
+            <xpath expr="//field[@name='amount_total']" position="after">
+                <field name="l10n_ve_amount_total_bs" 
+                       widget="monetary" 
+                       options="{'currency_field': 'l10n_ve_currency_id'}"
+                       class="oe_subtotal_footer_separator"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Vista tree de líneas de orden -->
+    <record id="view_order_tree_inherit_ve" model="ir.ui.view">
+        <field name="name">sale.order.tree.inherit.ve</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='amount_total']" position="after">
+                <field name="l10n_ve_amount_total_bs" optional="show"/>
+                <field name="l10n_ve_exchange_rate" optional="hide"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

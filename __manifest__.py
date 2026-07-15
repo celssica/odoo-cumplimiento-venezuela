@@ -23,15 +23,18 @@
     'depends': [
         'base',
         'account',
+        'sale',
         'l10n_latam_base',
     ],
     'data': [
         'security/ir.model.access.csv',
         'data/account_tax_data.xml',
         'data/res_currency_data.xml',
+        'data/ir_cron_data.xml',
         'views/res_partner_views.xml',
         'views/account_move_views.xml',
         'views/res_config_settings_views.xml',
+        'views/sale_order_views.xml',
     ],
     'installable': True,
     'application': True,
