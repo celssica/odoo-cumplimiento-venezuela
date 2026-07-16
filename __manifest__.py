@@ -1,5 +1,5 @@
 {
-    'name': 'CELSSICA - Cumplimiento Venezuela',
+    'name': 'Cumplimiento SENIAT Venezuela',
     'version': '17.0.1.0.0',
     'category': 'Accounting/Localizations',
     'summary': 'Localización Venezuela para Odoo 17 - Retenciones, ISLR, IVA, Facturación',

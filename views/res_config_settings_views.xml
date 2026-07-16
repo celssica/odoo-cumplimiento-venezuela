@@ -6,7 +6,8 @@
         <field name="inherit_id" ref="base.res_config_settings_view_form"/>
         <field name="arch" type="xml">
             <xpath expr="//form" position="inside">
-                <app data-string="Venezuela" string="Venezuela" name="venezuela_settings">
+                <app data-string="Venezuela" string="Venezuela" name="venezuela_settings"
+                     logo="/l10n_ve_celssica/static/description/venezuela_flag.png">
                     <block title="Configuración Fiscal Venezuela">
                         <setting string="Unidad Tributaria (UT)">
                             <field name="l10n_ve_ut_amount"/>
