@@ -81,18 +81,25 @@ class ResCurrency(models.Model):
             return False
 
     def l10n_ve_get_current_rate(self):
-        """Obtener tasa actual del VES"""
+        """Obtener tasa actual del VES (Bs/USD).
+
+        Busca la tasa más reciente disponible (fecha <= hoy) y, si no existe
+        ninguna, intenta obtenerla en vivo desde Yadio (bootstrap único).
+        """
         currency_ves = self.env.ref('base.VES', raise_if_not_found=False)
         if not currency_ves:
             return 0.0
-        
+
         today = fields.Date.today()
         rate = self.env['res.currency.rate'].search([
             ('currency_id', '=', currency_ves.id),
-            ('name', '=', today),
-            ('company_id', '=', self.env.company.id),
-        ], limit=1)
-        
-        if rate:
+            ('name', '<=', today),
+            ('company_id', 'in', [self.env.company.id, False]),
+        ], order='name desc', limit=1)
+
+        if rate and rate.rate:
             return 1.0 / rate.rate  # Devolver tasa directa (Bs/USD)
-        return 0.0
+
+        # No hay tasa almacenada: intentar obtenerla en vivo
+        live = self.l10n_ve_update_rate_yadio()
+        return live or 0.0

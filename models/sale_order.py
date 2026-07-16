@@ -8,8 +8,6 @@ class SaleOrder(models.Model):
         string='Tasa del Día (Bs/USD)',
         digits=(12, 2),
         help='Tasa de cambio USD a Bs para esta cotización',
-        readonly=True,
-        states={'draft': [('readonly', False)], 'sent': [('readonly', False)]},
     )
     l10n_ve_exchange_rate_date = fields.Date(
         string='Fecha de la Tasa',
@@ -71,8 +69,9 @@ class SaleOrder(models.Model):
         # Llamar al método en el modelo res.currency con sudo para evitar permisos
         rate = self.env['res.currency'].sudo().l10n_ve_update_rate_yadio()
         if rate:
-            # Forzar recálculo de campos computados
-            self._compute_amounts_bs()
+            # Escribir la tasa en la orden; los campos store=True se recalculan solos
+            self.l10n_ve_exchange_rate = rate
+            self.l10n_ve_exchange_rate_date = fields.Date.today()
             return {
                 'type': 'ir.actions.client',
                 'tag': 'display_notification',
